@@ -1,0 +1,68 @@
+datasets:
+    1.5DL:
+        paths: ['example-data-2.csv']
+        fields: ['SS-RSRP', 'SS-SINR', 'SS-RSRQ', 'Net PDSCH Thp (PCell)', 'BLER']
+        test: 'HTTP UL'
+        altitude: 1.5
+
+    1.5UL:
+        paths: ['example-data-2.csv']
+        fields: ['SS-RSRP', 'SS-SINR', 'SS-RSRQ', 'Net PUSCH Thp', 'BLER', 'TxPower (PCell)']
+        test: 'HTTP UL'
+        altitude: 1.5
+    15DL:
+        paths: ['example-data-2.csv']
+        fields: ['SS-RSRP', 'SS-SINR', 'SS-RSRQ', 'Net PDSCH Thp (PCell)', 'BLER']
+        test: 'HTTP UL'
+        altitude: 15
+
+    15UL:
+        paths: ['example-data-2.csv']
+        fields: ['SS-RSRP', 'SS-SINR', 'SS-RSRQ', 'Net PUSCH Thp', 'BLER', 'TxPower (PCell)']
+        test: 'HTTP UL'
+        altitude: 15
+    30DL:
+        paths: ['example-data-2.csv']
+        fields: ['SS-RSRP', 'SS-SINR', 'SS-RSRQ', 'Net PDSCH Thp (PCell)', 'BLER']
+        test: 'HTTP UL'
+        altitude: 30
+
+    30UL:
+        paths: ['example-data-2.csv']
+        fields: ['SS-RSRP', 'SS-SINR', 'SS-RSRQ', 'Net PUSCH Thp', 'BLER', 'TxPower (PCell)']
+        test: 'HTTP UL'
+        altitude: 30 
+    45DL:
+        paths: ['example-data-2.csv']
+        fields: ['SS-RSRP', 'SS-SINR', 'SS-RSRQ', 'Net PDSCH Thp (PCell)', 'BLER']
+        test: 'HTTP UL'
+        altitude: 45
+
+    45UL:
+        paths: ['example-data-2.csv']
+        fields: ['SS-RSRP', 'SS-SINR', 'SS-RSRQ', 'Net PUSCH Thp', 'BLER', 'TxPower (PCell)']
+        test: 'HTTP UL'
+        altitude: 45
+
+graphs:
+    RSRP_UL:
+        datasets: ['1.5UL', '15UL', '30UL', '45UL']
+        legends: ['1.5m', '15m', '30m', '45m']
+        key: 'SS-RSRP'
+        title: 'CDF of RSRP'
+        x-label: 'RSRP [dBm]'
+        type: cdf 
+        size: (x, y)
+        preview: True
+        outdir: 'plot'
+
+    RSSI_DL:
+        datasets: ['1.5DL', '15DL', '30DL', '45DL']
+        legends: ['1.5m', '15m', '30m', '45m']
+        key: 'SS-SINR'
+        title: 'CDF of SINR'
+        x-label: 'RSSI [dB]'
+        type: cdf 
+        size: (x, y)
+        preview: False
+        outdir: 'plot'

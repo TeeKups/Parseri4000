@@ -1,6 +1,7 @@
 import csv
 import tkinter as tk
 import pathlib
+import logging
 
 from . import Argparser
 from .misc import error as error
@@ -11,9 +12,10 @@ import parser4k.clocker_parser as clocker
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.WARNING)
     argd = Argparser.get_cli_args()
     if argd['type'] == 'qpoc':
-        qpoc.parse(argd['files'])
+        qpoc.parse(argd['files'], argd['preview_flag'])
     elif argd['type'] == 'ts3k':
         ts3k.parse(argd['files'])
     elif argd['type'] == 'clocker':

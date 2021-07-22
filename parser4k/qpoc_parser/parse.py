@@ -1,108 +1,174 @@
 import yaml
-yaml.load = yaml.safe_load
+import csv
+import logging
+import os
+import matplotlib.pyplot as plt
 
-"""
-- rsrp
-- sinr
-- rsrq
-- thp
-- tx_pwr
-- BLER
-- spectral efficiency (b/s/Hz)
+#- rsrp
+#- sinr
+#- rsrq
+#- thp
+#- tx_pwr
+#- BLER
+#- spectral efficiency (b/s/Hz)
+#
+#datasets:
+#    1.5DL:
+#        paths: ['dna/*', 'elisa/*', 'telia/*']
+#        fields: ['rsrp', 'rssi', 'rsrq', 'pdsch thp', 'bler']
+#        test: 'HTTP DL'
+#        altitude: 1.5
+#
+#    15DL:
+#        paths: ['dna/*', 'elisa/*', 'telia/*']
+#        fields: ['rsrp', 'rssi', 'rsrq', 'pdsch thp', 'bler']
+#        test: 'HTTP DL'
+#        altitude: 15
+#
+#    15UL:
+#        paths: ['dna/*', 'elisa/*', 'telia/*']
+#        fields: ['rsrp', 'rssi', 'rsrq', 'pusch thp', 'bler', 'tx pwr']
+#        test: 'HTTP UL'
+#        altitude: 15
+#
+#graphs:
+#    RSRP_UL:
+#        datasets: ['1.5UL', '15UL', '30UL', '45UL']
+#        legends: ['1.5m', '15m', '30m', '45m']
+#        key: 'rsrp'
+#        y-label: 'RSRP [dBm]'
+#        type: cdf|hist|pdf|???
+#        size: (x, y)
+#        preview: True
+#        outdir: './../joku-kansio'
+#
+#    RSSI_DL:
+#        datasets: ['1.5DL', '15DL', '30DL', '45m']
+#        legends: ['1.5m', '15m', '30m', '45m']
+#        key: 'RSSI'
+#        y-label: 'RSSI [dB]'
+#        type: cdf|hist|pdf|???
+#        size: (x, y)
+#        preview: True
+#        outdir: './../joku-kansio'
 
-1.5m:
-    paths: ['dna/*', 'elisa/*', 'telia/*']
-    data: ['rsrp', 'rssi', 'rsrq', 'pdsch thp', 'pusch thp', 'bler', 'tx pwr', 'spectral eff']
-    alt: 1.5
+#struct metadata():
+#    some_data: some value
+#
+#wordbook = {
+#    full: abbr,
+#    full2: abbr2
+#}
+#
+#def cdf(data, metadata):
+#    pass
+#
+#def pdf(data, metadata):
+#    pass
+#
+#def hist(data, metadata):
+#    pass
+#
+#def derive_metric(item, from):
+#    switch (item):
+#    case spectral_eff:
+#        return smthing
+#    case smthing:
+#        return smthing else
+#    etc...
 
-15m:
-    paths: ['dna/*', 'elisa/*', 'telia/*']
-    data: ['rsrp', 'rssi', 'rsrq', 'pdsch thp', 'pusch thp', 'bler', 'tx pwr', 'spectral eff']
-    alt: 15
+def parse_datasets(datasets) -> dict:
+    # TODO: Un-hardcode this
+    altitude_accuracy = 2.5
 
-graphs:
-    graph_id1:
-        data-set: ['some-set', 'some-other-set', 'another-set']
-        legends: ['some-legend', 'some-other-legend', 'another-legend']
-        key: 'rsrp'
-        title: 'RSRP'
-        y-label: 'RSRP [dBm)'
-        graph-type: cdf|hist|pdf|???
-        size: (x, y)
-        preview: True
-        outdir: './../joku-kansio'
+    file_data = {}
+    r_datasets = {}
+    for id, dataset in datasets.items():
+        for path in dataset['paths']:
+            if path not in file_data:
+                file_data[path] = {}
+            file_data[path][id] = {}
+    
+    for filename in file_data:
+        takeoff_altitude = None
+        with open(filename, 'r') as file:
+            headers = file.readline().replace('\u200b', '')
+            #file.seek(0)
+             
+            reader = csv.DictReader(file, fieldnames=headers.split(','), delimiter=',')
+            for row in reader:
+                if row['Altitude'] == None or row['Altitude'] == '':
+                    continue
+                elif takeoff_altitude == None:
+                    takeoff_altitude = float(row['Altitude'])
 
-    graph_id2:
-        data-set: ['1.5m', '15m', '25m', '35m', '45m']
-        legends: ['1.5m', '15m', '25m', '35m', '45m']
-        key: 'RSSI'
-        title: 'paskagraafi'
-        y-label: 'RSSI [dB]'
-        graph-type: cdf|hist|pdf|???
-        size: (x, y)
-        preview: True
-        outdir: './../joku-kansio'
-"""
+                otg_altitude = float(row['Altitude']) - takeoff_altitude
+                for dataset in file_data[filename]:
+                    #flight_level = float(datasets[dataset]['altitude'])
+                    flight_level = 0
 
-"""
-struct metadata():
-    some_data: some value
+                    if datasets[dataset]['test'].upper() != row['Last started test\n'].upper() \
+                    or row['Data technology'] != 'LTE-5GNR' \
+                    or otg_altitude < flight_level-altitude_accuracy \
+                    or otg_altitude > flight_level+altitude_accuracy \
+                    : continue
 
-wordbook = {
-    full: abbr,
-    full2: abbr2
-}
+                    for field in datasets[dataset]['fields']:
+                        if field not in file_data[filename][dataset]:
+                            file_data[filename][dataset][field] = [row[field]]
+                        else:
+                            file_data[filename][dataset][field].append(row[field])
 
-def cdf(data, metadata):
-    pass
+    for dataset, data in datasets.items():
+        if dataset not in r_datasets: r_datasets[dataset] = {}
+        for filename in data['paths']:
+            for field in data['fields']:
+                r_datasets[dataset][field] = file_data[filename][dataset][field]
 
-def pdf(data, metadata):
-    pass
+    return r_datasets
 
-def hist(data, metadata):
-    pass
+def cdf(datasets, params):
+    fig, ax = plt.subplots(figsize=(8, 4))
+    
+    for i, dataset in enumerate(params['datasets']):
+        #ax = plt.subplot(2, 2, i+1)
+        x_data = datasets[dataset][params['key']]
+        ax.hist(x_data, len(x_data), density=True, histtype='step', cumulative=True, label=params['legends'][i])
+    ax.legend(loc='right')
+    ax.set_title(params['title'])
+    ax.set_xlabel(params['x-label'])
+    ax.set_ylabel('Probability')
+    return ax
 
-def derive_metric(item, from):
-    switch (item):
-    case spectral_eff:
-        return smthing
-    case smthing:
-        return smthing else
-    etc...
+def parse(file, preview_flag):
+    logger = logging.getLogger(__name__)
+    with open(file, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
 
-def concat_files(files):
-    for row in each files:
-        if altitude = empty; then skip row
-        groundLevel := first non-empty altitude
-        if (altitude - groundLevel < altitudeTgt); then skip row
-        else; for each item in data:
-            item_key = wordbook[item]
-            if item in derived_types; id['data'].append(derive_metric(item_key, row))
-            elif row[item] != empty; then id['data'].append(row[item_key])
-            else skip
+    datasets = parse_datasets(config['datasets'])
 
-"""
+    #from pprint import pprint
+    #pprint(datasets, compact=True)
+    #exit()
 
-def parse(files):
-    pass
+    for title, params in config['graphs'].items():
+        for dataset in params['datasets']:
+            if dataset not in datasets:
+                logger.error(f'Dataset \'{dataset}\' in graph \'{title}\' not configured. Omitting...')
+                continue
 
-    """
-    'main' function:
-    parses files into data sets
-        - concatenates the files given in name:path
-    """
+        if params['type'].upper() == 'CDF':
+            graph = cdf(datasets, params)
+        elif params['type'].upper() == 'PDF':
+            pass
+        elif params['type'].upper() == 'HISTOGRAM':
+            pass
+        else:
+            pass
+            # TODO: Error msg
 
-    """
-    for graph_id in graphs:
-        for data-set in data-sets:
-            if not exists(sets[data-set]):
-                sets[data-set] = concat_files(data-set.paths)
+        if preview_flag:
+            plt.show()
+        else:
+            plt.savefig(os.path.join(params['outdir'], title+'.png'))
 
-        switch(graph-type):
-            case CDF:
-                graph = cdf(data, metadata)
-                if graph_id.preview:
-                    show(graph)
-                with open os.path.join(graph_id.outdir, graph_id) as f:
-                    f.write(graph)
-    """    

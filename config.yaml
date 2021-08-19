@@ -1,3 +1,30 @@
+db_file: db.json
+es_url: 'http://localhost:9200/_bulk'
+es_max_documents_per_request: 100000
+
+programs:
+  qpoc:
+    rootdir: 'data/qpoc'
+    profiles:
+      sample_a:
+        subdir: 'sample_a'
+        headers: ['SS-RSRP', 'SS-SINR', 'SS-RSRQ', 'Net PDSCH Thp (PCell)', 'BLER']
+
+      sample_b: 
+        subdir: 'sample_b'
+        headers: ['SS-RSRP', 'SS-SINR', 'SS-RSRQ', 'Net PUSCH Thp', 'BLER', 'TxPower (PCell)']
+  nemo:
+    rootdir: 'data/nemo'
+    profiles:
+      sample_a:
+        subdir: 'sample_a'
+        headers: ['nemoheader1', 'nemoheader2']
+
+      sample_b: 
+        subdir: 'sample_b'
+        headers: ['nemoheader1', 'nemoheader3']
+
+
 datasets:
     1.5DL:
         paths: ['example-data-2.csv']

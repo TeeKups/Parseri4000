@@ -4,83 +4,7 @@ import logging
 import os
 import matplotlib.pyplot as plt
 
-#- rsrp
-#- sinr
-#- rsrq
-#- thp
-#- tx_pwr
-#- BLER
-#- spectral efficiency (b/s/Hz)
-#
-#datasets:
-#    1.5DL:
-#        paths: ['dna/*', 'elisa/*', 'telia/*']
-#        fields: ['rsrp', 'rssi', 'rsrq', 'pdsch thp', 'bler']
-#        test: 'HTTP DL'
-#        altitude: 1.5
-#
-#    15DL:
-#        paths: ['dna/*', 'elisa/*', 'telia/*']
-#        fields: ['rsrp', 'rssi', 'rsrq', 'pdsch thp', 'bler']
-#        test: 'HTTP DL'
-#        altitude: 15
-#
-#    15UL:
-#        paths: ['dna/*', 'elisa/*', 'telia/*']
-#        fields: ['rsrp', 'rssi', 'rsrq', 'pusch thp', 'bler', 'tx pwr']
-#        test: 'HTTP UL'
-#        altitude: 15
-#
-#graphs:
-#    RSRP_UL:
-#        datasets: ['1.5UL', '15UL', '30UL', '45UL']
-#        legends: ['1.5m', '15m', '30m', '45m']
-#        key: 'rsrp'
-#        y-label: 'RSRP [dBm]'
-#        type: cdf|hist|pdf|???
-#        size: (x, y)
-#        preview: True
-#        outdir: './../joku-kansio'
-#
-#    RSSI_DL:
-#        datasets: ['1.5DL', '15DL', '30DL', '45m']
-#        legends: ['1.5m', '15m', '30m', '45m']
-#        key: 'RSSI'
-#        y-label: 'RSSI [dB]'
-#        type: cdf|hist|pdf|???
-#        size: (x, y)
-#        preview: True
-#        outdir: './../joku-kansio'
-
-#struct metadata():
-#    some_data: some value
-#
-#wordbook = {
-#    full: abbr,
-#    full2: abbr2
-#}
-#
-#def cdf(data, metadata):
-#    pass
-#
-#def pdf(data, metadata):
-#    pass
-#
-#def hist(data, metadata):
-#    pass
-#
-#def derive_metric(item, from):
-#    switch (item):
-#    case spectral_eff:
-#        return smthing
-#    case smthing:
-#        return smthing else
-#    etc...
-
 def parse_datasets(datasets) -> dict:
-    # TODO: Un-hardcode this
-    altitude_accuracy = 2.5
-
     file_data = {}
     r_datasets = {}
     for id, dataset in datasets.items():
@@ -92,7 +16,9 @@ def parse_datasets(datasets) -> dict:
     for filename in file_data:
         takeoff_altitude = None
         with open(filename, 'r') as file:
+            # Qualipoc uses 0-width space in some fields, which ofc cannot be seen or typed into config so get rid of these
             headers = file.readline().replace('\u200b', '')
+
             #file.seek(0)
              
             reader = csv.DictReader(file, fieldnames=headers.split(','), delimiter=',')
@@ -127,6 +53,7 @@ def parse_datasets(datasets) -> dict:
 
     return r_datasets
 
+"""
 def cdf(datasets, params):
     fig, ax = plt.subplots(figsize=(8, 4))
     
@@ -139,6 +66,7 @@ def cdf(datasets, params):
     ax.set_xlabel(params['x-label'])
     ax.set_ylabel('Probability')
     return ax
+"""
 
 def parse(file, preview_flag):
     logger = logging.getLogger(__name__)

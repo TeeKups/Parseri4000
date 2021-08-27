@@ -90,7 +90,7 @@ def send_to_es(file: tuple, config: dict) -> int:
 
     for i, row in enumerate(zip(*parsed_fields.values())):
         doc = ''
-        for key,val in ((key,val) for (key,val) in zip(parsed_fields.keys(), row)):
+        for key,val in zip(parsed_fields.keys(), row)):
             if re.match(r'^-?[0-9]+$', val) is not None:
                 # int
                 doc += f'"{key}": {val},'

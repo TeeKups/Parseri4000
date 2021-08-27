@@ -1,5 +1,7 @@
 # misc
 .~lock*
+elasticsearch-*
+kibana-*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

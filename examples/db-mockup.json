@@ -1,0 +1,34 @@
+{
+    "somepath": {
+        "profileX": {
+            "last_modified": 1234567890
+        },
+        "profileY": {
+            "last_modified": 1234567890
+        }
+    },
+    "path1": {
+        "profile1": {
+            "last_modified": 123456789
+        },
+        "profile3": {
+            "last_modified": 123456789
+        }
+    },
+    "path2": {
+        "profile1": {
+            "last_modified": 123456789
+        },
+        "profile3": {
+            "last_modified": 123456789
+        }
+    },
+    "path3": {
+        "profile1": {
+            "last_modified": 123456789
+        },
+        "profile3": {
+            "last_modified": 123456789
+        }
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "/home/qubz/git/Parseri4000/data/qpoc/sample_a/example-data-2.csv": {
+        "qpoc": {
+            "profile_a": {
+                "last_modified": 1630038510.065726
+            }
+        }
+    },
+    "/home/qubz/git/Parseri4000/data/qpoc/sample_b/example-data.csv": {
+        "qpoc": {
+            "profile_b": {
+                "last_modified": 1629873286.5075278
+            }
+        }
+    }
+}

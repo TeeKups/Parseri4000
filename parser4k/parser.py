@@ -31,7 +31,7 @@ def parse(path: str, program: str, sep: str, fields: list) -> dict:
 
     META_FIELDS = [TIME_FIELD, LATITUDE_FIELD, LONGITUDE_FIELD, SPEED_FIELD, ALTITUDE_FIELD]
 
-    with open(path, 'r') as file:
+    with open(path, 'r', newline='') as file:
         # Qualipoc uses 0-width space in some fields,
         # which ofc cannot be seen or typed into config...
         # so get rid of these

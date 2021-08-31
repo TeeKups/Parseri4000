@@ -35,7 +35,7 @@ def parse(path: str, program: str, sep: str, fields: list) -> dict:
         # Qualipoc uses 0-width space in some fields,
         # which ofc cannot be seen or typed into config...
         # so get rid of these
-        headers = file.readline().replace('\u200b', '')
+        headers = file.readline().replace('\u200b', '').replace('\n', '')
 
         reader = csv.DictReader(file, fieldnames=headers.split(sep), delimiter=sep)
 
@@ -45,6 +45,7 @@ def parse(path: str, program: str, sep: str, fields: list) -> dict:
             raise RequiredFieldMissingError(file, TIME_FIELD)
 
         takeoff_altitude = None
+        altitude_delta = None
         parsed = {}
         for field in fields:
             parsed[field] = []
@@ -58,11 +59,16 @@ def parse(path: str, program: str, sep: str, fields: list) -> dict:
             if ALTITUDE_FIELD in fields:
                 if row[ALTITUDE_FIELD] == None or row[ALTITUDE_FIELD] == '':
                     continue
-                elif altitude_delta == None:
+                if altitude_delta == None:
                     altitude_delta = float(row[ALTITUDE_FIELD])
-                parsed['altitude_delta'] = float(row[ALTITUDE_FIELD]) - takeoff_altitude
+                if takeoff_altitude == None:
+                    takeoff_altitude = float(row[ALTITUDE_FIELD])
+
+                parsed['altitude_delta'].append(float(row[ALTITUDE_FIELD]) - takeoff_altitude)
         
-            for field in parsed.keys(): #fields:
+            for field in set(parsed.keys() - present_meta_fields - {'altitude_delta'}): #fields:
+                if field not in parsed: print("fuck")
+                if field not in row: print("shit")
                 parsed[field].append(row[field])
 
     return parsed

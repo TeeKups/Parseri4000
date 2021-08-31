@@ -16,7 +16,7 @@ from time import sleep
 from . import Argparser
 from . import parser
 
-MIN_PYTHON_VERSION = (3, 9, 6) # 3.8.0 should be alright, but not tested
+MIN_PYTHON_VERSION = (3, 9, 6)
 if version[0:3] < MIN_PYTHON_VERSION:
     exit('Python version %s.%s.%s or later is required!\n' % MIN_PYTHON_VERSION)
 
@@ -27,7 +27,7 @@ File = namedtuple('File', 'path, program, profile')
 
 logger = logging.getLogger(__name__)
 
-def get_extension(path: pathlib.Path) -> str:
+def get_extension(path) -> str:
     return str(path).split('.')[-1]
 
 def read_db(db: str) -> dict:
@@ -90,18 +90,18 @@ def send_to_es(file: tuple, config: dict) -> int:
 
     for i, row in enumerate(zip(*parsed_fields.values())):
         doc = ''
-        for key,val in zip(parsed_fields.keys(), row)):
-            if re.match(r'^-?[0-9]+$', val) is not None:
+        for key,val in zip(parsed_fields.keys(), row):
+            if re.match(r'^-?[0-9]+$', str(val)) is not None:
                 # int
                 doc += f'"{key}": {val},'
-            elif re.match(r'^-?[0-9]+\.[0-9]+$]', val) is not None:
+            elif re.match(r'^-?[0-9]+\.[0-9]+$]', str(val)) is not None:
                 # float
                 doc += f'"{key}": {val},'
             else:
                 # string
                 doc += f'"{key}": "{val}",'
 
-        documents += index_template % (file.program, pathlib.Path(path).stem ,file.profile, i)
+        documents += index_template % (file.program.lower(), str(pathlib.Path(path).stem).lower() ,file.profile.lower(), i)
         documents += '{%s}\n' % (doc[0:-1])
 
     res = requests.put(config['es_url'], headers={'Content-Type': 'application/json'}, data=documents)
@@ -237,7 +237,6 @@ if __name__ == '__main__':
 
     try:
         main(config)
-    except:
-        pass
-
+    except KeyboardInterrupt:
+        exit()
 
